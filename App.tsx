@@ -1,24 +1,23 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
-import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Settings, Sparkles, Plus, History, Archive, Menu, X as CloseIcon, Database, FileText, Video, Mic, Lightbulb, Users as UsersIcon, LogOut, Lock, Briefcase } from 'lucide-react';
+import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
+import { LayoutDashboard, Package, Settings, Sparkles, History, Archive, Menu, X as CloseIcon, Database, FileText, Video, Mic, Lightbulb, Users as UsersIcon, LogOut } from 'lucide-react';
 
-import Dashboard from './pages/Dashboard.tsx';
-import ProductList from './pages/ProductList.tsx';
-import SchemaEditor from './pages/SchemaEditor.tsx';
-import AIStudio from './pages/AIStudio.tsx';
-import AIHistory from './pages/AIHistory.tsx';
-import AssetRepo from './pages/AssetRepo.tsx';
-import BVPromptRepo from './pages/BVPromptRepo.tsx';
-import GoodCopyRepo from './pages/GoodCopyRepo.tsx';
-import GoodScriptRepo from './pages/GoodScriptRepo.tsx';
-import CreativeRepo from './pages/CreativeRepo.tsx';
-import OralScriptGenerator from './pages/OralScriptGenerator.tsx';
-import AdminPanel from './pages/AdminPanel.tsx';
-import Login from './pages/Login.tsx';
+import Dashboard from './pages/Dashboard';
+import ProductList from './pages/ProductList';
+import SchemaEditor from './pages/SchemaEditor';
+import AIStudio from './pages/AIStudio';
+import AIHistory from './pages/AIHistory';
+import AssetRepo from './pages/AssetRepo';
+import BVPromptRepo from './pages/BVPromptRepo';
+import GoodCopyRepo from './pages/GoodCopyRepo';
+import GoodScriptRepo from './pages/GoodScriptRepo';
+import CreativeRepo from './pages/CreativeRepo';
+import OralScriptGenerator from './pages/OralScriptGenerator';
+import AdminPanel from './pages/AdminPanel';
+import Login from './pages/Login';
 
-import { Product, FieldDefinition, PromptTemplate, GoodAsset, AdCampaign, CreativeAsset, User, UserPermissions } from './types.ts';
-import { DEFAULT_FIELDS, DEFAULT_CATEGORIES, STORAGE_KEYS, ADMIN_PERMISSIONS, DEFAULT_JOB_TITLES } from './constants.ts';
+import { Product, FieldDefinition, PromptTemplate, GoodAsset, AdCampaign, CreativeAsset, User, UserPermissions } from './types';
+import { DEFAULT_FIELDS, DEFAULT_CATEGORIES, STORAGE_KEYS, ADMIN_PERMISSIONS, DEFAULT_JOB_TITLES } from './constants';
 
 const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIsOpen: (v: boolean) => void, user: User, onLogout: () => void }) => {
   const location = useLocation();
@@ -38,7 +37,6 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
       { path: '/ai-studio', icon: Sparkles, label: 'AI 創意中心', key: 'aiStudio' as keyof UserPermissions },
       { path: '/history', icon: History, label: '生成記錄', key: 'dashboard' as keyof UserPermissions },
     ];
-
     return items.filter(item => user.permissions[item.key] !== 'NONE');
   }, [user]);
 
@@ -50,7 +48,6 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
           onClick={() => setIsOpen(false)}
         />
       )}
-
       <div className={`
         fixed lg:static inset-y-0 left-0 z-50
         w-64 bg-rose-50 text-rose-900 min-h-screen p-6 flex flex-col shadow-inner border-r border-rose-100
@@ -85,7 +82,6 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
               <span className="font-bold text-sm">{item.label}</span>
             </Link>
           ))}
-
           {user.role === 'ADMIN' && (
             <Link
               to="/admin"
@@ -117,7 +113,7 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
           >
             <LogOut className="w-4 h-4" /> 登出系統
           </button>
-          <p className="text-[9px] text-rose-300 text-center font-medium italic">企劃部管理系統 v1.9 (Member Info)</p>
+          <p className="text-[9px] text-rose-300 text-center font-medium italic">企劃部管理系統 v1.9</p>
         </div>
       </div>
     </>
@@ -152,7 +148,6 @@ const App: React.FC = () => {
     const storedAdCampaigns = localStorage.getItem(STORAGE_KEYS.AD_CAMPAIGNS);
     const storedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
     const storedJobTitles = localStorage.getItem(STORAGE_KEYS.JOB_TITLES);
-
     const storedCurrentUser = sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
 
     if (storedProducts) setProducts(JSON.parse(storedProducts));
@@ -253,26 +248,4 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Dashboard products={products} />} />
                 <Route path="/products" element={<ProductList products={products} setProducts={setProducts} fields={fields} categories={categories} user={currentUser} />} />
-                <Route path="/creative-repo" element={<CreativeRepo products={products} creatives={creatives} setCreatives={setCreatives} user={currentUser} />} />
-                <Route path="/copy-repo" element={<GoodCopyRepo products={products} assets={goodCopy} setAssets={setGoodCopy} user={currentUser} />} />
-                <Route path="/script-repo" element={<GoodScriptRepo products={products} assets={goodScripts} setAssets={setGoodScripts} user={currentUser} />} />
-                <Route path="/oral-script" element={<OralScriptGenerator products={products} adCampaigns={adCampaigns} setAdCampaigns={setAdCampaigns} user={currentUser} />} />
-                <Route path="/assets" element={<AssetRepo products={products} setProducts={setProducts} prompts={prompts} setPrompts={setPrompts} user={currentUser} />} />
-                <Route path="/bv-repo" element={<BVPromptRepo prompts={bvPrompts} setPrompts={setBvPrompts} user={currentUser} />} />
-                <Route path="/settings" element={<SchemaEditor fields={fields} setFields={setFields} categories={categories} setCategories={setCategories} user={currentUser} />} />
-                <Route path="/ai-studio" element={<AIStudio products={products} setProducts={setProducts} prompts={[...prompts, ...bvPrompts]} user={currentUser} />} />
-                <Route path="/history" element={<AIHistory />} />
-                {currentUser.role === 'ADMIN' && (
-                  <Route path="/admin" element={<AdminPanel users={users} setUsers={setUsers} jobTitles={jobTitles} setJobTitles={setJobTitles} />} />
-                )}
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </div>
-          </main>
-        </div>
-      )}
-    </Router>
-  );
-};
-
-export default App;
+                <
