@@ -4,9 +4,12 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: '/', // 如果你是部署到子目錄，請修改此處
+  // 關鍵：確保在 GitHub Pages 的子目錄下能正確找到 JS/CSS 資源
+  base: './', 
   build: {
     outDir: 'dist',
-    sourcemap: false
+    emptyOutDir: true,
+    sourcemap: false,
+    chunkSizeWarningLimit: 1000 
   }
 });
