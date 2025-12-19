@@ -1,17 +1,16 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
-// Fix: Explicitly import process to provide the correct Node.js types and resolve the 'cwd' property error
 import process from 'node:process';
 
 export default defineConfig(({ mode }) => {
-  // Fix: Use the imported process object to safely call cwd()
   const env = loadEnv(mode, process.cwd(), '');
   
   return {
     plugins: [react()],
     base: '/',
     resolve: {
-      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
+      // 明確告訴 Vite 優先嘗試這些副檔名
+      extensions: ['.tsx', '.ts', '.jsx', '.js', '.json']
     },
     define: {
       'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || '')
