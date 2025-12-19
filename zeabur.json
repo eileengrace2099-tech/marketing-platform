@@ -1,0 +1,16 @@
+{
+  "build": {
+    "command": "npm install && npm run build",
+    "output_dir": "dist"
+  },
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+    }
+  ]
+}
