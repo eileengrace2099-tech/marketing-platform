@@ -1,22 +1,24 @@
 import { defineConfig, loadEnv } from 'vite';
 import react from '@vitejs/plugin-react';
+// Fix: Explicitly import process to provide the correct Node.js types and resolve the 'cwd' property error
+import process from 'node:process';
 
 export default defineConfig(({ mode }) => {
-  // Use process.cwd() to get the current working directory for loading environment variables.
-  // Casting process to any to bypass the TypeScript error when Node.js types are not fully recognized in the configuration context.
-  const env = loadEnv(mode, (process as any).cwd(), '');
+  // Fix: Use the imported process object to safely call cwd()
+  const env = loadEnv(mode, process.cwd(), '');
   
   return {
     plugins: [react()],
-    base: '/', 
+    base: '/',
+    resolve: {
+      extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json']
+    },
     define: {
-      // Inject the Gemini API key from environment variables so it can be accessed by process.env.API_KEY in the frontend code.
       'process.env.API_KEY': JSON.stringify(env.API_KEY || env.VITE_API_KEY || '')
     },
     build: {
       outDir: 'dist',
       emptyOutDir: true,
-      sourcemap: false,
       rollupOptions: {
         output: {
           manualChunks: {
