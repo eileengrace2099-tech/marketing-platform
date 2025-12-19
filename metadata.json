@@ -1,0 +1,7 @@
+{
+  "name": "Planning Department Management Platform",
+  "description": "A comprehensive backend for planning departments to manage product data with dynamic fields and AI-powered content generation (copywriting, scripts, and imagery).",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
