@@ -1,22 +1,15 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import { LayoutDashboard, Package, Settings, Sparkles, History, Archive, Menu, X as CloseIcon, Database, FileText, Video, Mic, Lightbulb, Users as UsersIcon, LogOut } from 'lucide-react';
+import { LayoutDashboard, Package, Settings, Menu, X as CloseIcon, Users as UsersIcon, LogOut, Shield } from 'lucide-react';
 
+// 核心功能頁面
 import Dashboard from './pages/Dashboard';
 import ProductList from './pages/ProductList';
 import SchemaEditor from './pages/SchemaEditor';
-import AIStudio from './pages/AIStudio';
-import AIHistory from './pages/AIHistory';
-import AssetRepo from './pages/AssetRepo';
-import BVPromptRepo from './pages/BVPromptRepo';
-import GoodCopyRepo from './pages/GoodCopyRepo';
-import GoodScriptRepo from './pages/GoodScriptRepo';
-import CreativeRepo from './pages/CreativeRepo';
-import OralScriptGenerator from './pages/OralScriptGenerator';
 import AdminPanel from './pages/AdminPanel';
 import Login from './pages/Login';
 
-import { Product, FieldDefinition, PromptTemplate, GoodAsset, AdCampaign, CreativeAsset, User, UserPermissions } from './types';
+import { Product, FieldDefinition, User, UserPermissions } from './types';
 import { DEFAULT_FIELDS, DEFAULT_CATEGORIES, STORAGE_KEYS, ADMIN_PERMISSIONS, DEFAULT_JOB_TITLES } from './constants';
 
 const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIsOpen: (v: boolean) => void, user: User, onLogout: () => void }) => {
@@ -24,20 +17,15 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
   const isActive = (path: string) => location.pathname === path;
 
   const navItems = useMemo(() => {
-    const items = [
+    return [
       { path: '/', icon: LayoutDashboard, label: '數據總覽', key: 'dashboard' as keyof UserPermissions },
       { path: '/products', icon: Package, label: '產品資料庫', key: 'products' as keyof UserPermissions },
-      { path: '/creative-repo', icon: Lightbulb, label: '好創意資料庫', key: 'creativeRepo' as keyof UserPermissions },
-      { path: '/copy-repo', icon: FileText, label: '好文案資料庫', key: 'copyRepo' as keyof UserPermissions },
-      { path: '/script-repo', icon: Video, label: '好腳本資料庫', key: 'scriptRepo' as keyof UserPermissions },
-      { path: '/oral-script', icon: Mic, label: '口播稿生成器', key: 'oralScript' as keyof UserPermissions },
-      { path: '/assets', icon: Archive, label: '產品資產歸檔', key: 'assets' as keyof UserPermissions },
-      { path: '/bv-repo', icon: Database, label: 'BV 語法庫', key: 'bvRepo' as keyof UserPermissions },
-      { path: '/settings', icon: Settings, label: '系統設定', key: 'settings' as keyof UserPermissions },
-      { path: '/ai-studio', icon: Sparkles, label: 'AI 創意中心', key: 'aiStudio' as keyof UserPermissions },
-      { path: '/history', icon: History, label: '生成記錄', key: 'dashboard' as keyof UserPermissions },
-    ];
-    return items.filter(item => user.permissions[item.key] !== 'NONE');
+      { path: '/settings', icon: Settings, label: '欄位自定義', key: 'settings' as keyof UserPermissions },
+      { path: '/admin', icon: Shield, label: '帳號管理', key: 'dashboard' as keyof UserPermissions, adminOnly: true },
+    ].filter(item => {
+        if (item.adminOnly && user.role !== 'ADMIN') return false;
+        return user.permissions[item.key] !== 'NONE';
+    });
   }, [user]);
 
   return (
@@ -57,7 +45,7 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
         <div className="flex items-center justify-between lg:justify-start gap-3 mb-10 px-2">
           <div className="flex items-center gap-3">
             <div className="bg-rose-500 p-2 rounded-xl shadow-lg shadow-rose-200">
-              <Sparkles className="w-6 h-6 text-white" />
+              <Package className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-xl font-black tracking-tight italic text-rose-600">PLAN PRO</h1>
           </div>
@@ -111,37 +99,19 @@ const App: React.FC = () => {
   const [jobTitles, setJobTitles] = useState<string[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [fields, setFields] = useState<FieldDefinition[]>([]);
-  const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
-  const [bvPrompts, setBvPrompts] = useState<PromptTemplate[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
-  const [goodCopy, setGoodCopy] = useState<GoodAsset[]>([]);
-  const [goodScripts, setGoodScripts] = useState<GoodAsset[]>([]);
-  const [creatives, setCreatives] = useState<CreativeAsset[]>([]);
-  const [adCampaigns, setAdCampaigns] = useState<AdCampaign[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const storedProducts = localStorage.getItem(STORAGE_KEYS.PRODUCTS);
     const storedFields = localStorage.getItem(STORAGE_KEYS.FIELDS);
-    const storedPrompts = localStorage.getItem(STORAGE_KEYS.PROMPT_TEMPLATES);
-    const storedBvPrompts = localStorage.getItem(STORAGE_KEYS.BV_PROMPTS);
     const storedCategories = localStorage.getItem(STORAGE_KEYS.CATEGORIES);
-    const storedGoodCopy = localStorage.getItem(STORAGE_KEYS.GOOD_COPY);
-    const storedGoodScripts = localStorage.getItem(STORAGE_KEYS.GOOD_SCRIPTS);
-    const storedCreatives = localStorage.getItem(STORAGE_KEYS.CREATIVE_REPO);
-    const storedAdCampaigns = localStorage.getItem(STORAGE_KEYS.AD_CAMPAIGNS);
     const storedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
     const storedJobTitles = localStorage.getItem(STORAGE_KEYS.JOB_TITLES);
     const storedCurrentUser = sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
 
     if (storedProducts) setProducts(JSON.parse(storedProducts));
-    if (storedPrompts) setPrompts(JSON.parse(storedPrompts));
-    if (storedBvPrompts) setBvPrompts(JSON.parse(storedBvPrompts));
-    if (storedGoodCopy) setGoodCopy(JSON.parse(storedGoodCopy));
-    if (storedGoodScripts) setGoodScripts(JSON.parse(storedGoodScripts));
-    if (storedCreatives) setCreatives(JSON.parse(storedCreatives));
-    if (storedAdCampaigns) setAdCampaigns(JSON.parse(storedAdCampaigns));
     
     if (storedJobTitles) {
       setJobTitles(JSON.parse(storedJobTitles));
@@ -220,15 +190,7 @@ const App: React.FC = () => {
               <Routes>
                 <Route path="/" element={<Dashboard products={products} />} />
                 <Route path="/products" element={<ProductList products={products} setProducts={setProducts} fields={fields} categories={categories} user={currentUser} />} />
-                <Route path="/creative-repo" element={<CreativeRepo products={products} creatives={creatives} setCreatives={setCreatives} user={currentUser} />} />
-                <Route path="/copy-repo" element={<GoodCopyRepo products={products} assets={goodCopy} setAssets={setGoodCopy} user={currentUser} />} />
-                <Route path="/script-repo" element={<GoodScriptRepo products={products} assets={goodScripts} setAssets={setGoodScripts} user={currentUser} />} />
-                <Route path="/oral-script" element={<OralScriptGenerator products={products} adCampaigns={adCampaigns} setAdCampaigns={setAdCampaigns} user={currentUser} />} />
-                <Route path="/assets" element={<AssetRepo products={products} setProducts={setProducts} prompts={prompts} setPrompts={setPrompts} user={currentUser} />} />
-                <Route path="/bv-repo" element={<BVPromptRepo prompts={bvPrompts} setPrompts={setBvPrompts} user={currentUser} />} />
                 <Route path="/settings" element={<SchemaEditor fields={fields} setFields={setFields} categories={categories} setCategories={setCategories} user={currentUser} />} />
-                <Route path="/ai-studio" element={<AIStudio products={products} setProducts={setProducts} prompts={[...prompts, ...bvPrompts]} user={currentUser} />} />
-                <Route path="/history" element={<AIHistory />} />
                 {currentUser.role === 'ADMIN' && (
                   <Route path="/admin" element={<AdminPanel users={users} setUsers={setUsers} jobTitles={jobTitles} setJobTitles={setJobTitles} />} />
                 )}
