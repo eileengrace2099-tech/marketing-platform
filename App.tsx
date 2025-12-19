@@ -82,20 +82,6 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
               <span className="font-bold text-sm">{item.label}</span>
             </Link>
           ))}
-          {user.role === 'ADMIN' && (
-            <Link
-              to="/admin"
-              onClick={() => setIsOpen(false)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 mt-6 border border-dashed ${
-                isActive('/admin') 
-                  ? 'bg-slate-800 text-white border-slate-800' 
-                  : 'text-slate-400 border-slate-200 hover:bg-slate-100'
-              }`}
-            >
-              <UsersIcon className="w-5 h-5" />
-              <span className="font-bold text-sm">權限與職務管理</span>
-            </Link>
-          )}
         </nav>
         
         <div className="mt-auto pt-6 border-t border-rose-100 space-y-4">
@@ -113,7 +99,6 @@ const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIs
           >
             <LogOut className="w-4 h-4" /> 登出系統
           </button>
-          <p className="text-[9px] text-rose-300 text-center font-medium italic">企劃部管理系統 v1.9</p>
         </div>
       </div>
     </>
@@ -189,8 +174,6 @@ const App: React.FC = () => {
         setCurrentUser(syncedUser);
       } else {
         setCurrentUser(null);
-        localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-        sessionStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
       }
     }
 
@@ -210,15 +193,6 @@ const App: React.FC = () => {
     setIsLoaded(true);
   }, []);
 
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(products)); }, [products, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users)); }, [users, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.FIELDS, JSON.stringify(fields)); }, [fields, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories)); }, [categories, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.GOOD_COPY, JSON.stringify(goodCopy)); }, [goodCopy, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.GOOD_SCRIPTS, JSON.stringify(goodScripts)); }, [goodScripts, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.CREATIVE_REPO, JSON.stringify(creatives)); }, [creatives, isLoaded]);
-  useEffect(() => { if (isLoaded) localStorage.setItem(STORAGE_KEYS.JOB_TITLES, JSON.stringify(jobTitles)); }, [jobTitles, isLoaded]);
-
   const handleLogout = () => {
     setCurrentUser(null);
     localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
@@ -234,7 +208,6 @@ const App: React.FC = () => {
       ) : (
         <div className="flex min-h-screen font-sans antialiased text-slate-800 bg-pink-50/20 overflow-x-hidden">
           <Sidebar isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} user={currentUser} onLogout={handleLogout} />
-          
           <main className="flex-1 overflow-y-auto">
             <div className="lg:hidden flex items-center justify-between p-4 bg-white border-b border-rose-100 sticky top-0 z-30">
                <button onClick={() => setIsSidebarOpen(true)} className="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all">
@@ -243,9 +216,30 @@ const App: React.FC = () => {
                <h1 className="text-lg font-black text-rose-600">PLAN PRO</h1>
                <div className="w-10"></div>
             </div>
-
             <div className="max-w-7xl mx-auto p-4 md:p-8 lg:p-10">
               <Routes>
                 <Route path="/" element={<Dashboard products={products} />} />
                 <Route path="/products" element={<ProductList products={products} setProducts={setProducts} fields={fields} categories={categories} user={currentUser} />} />
-                <
+                <Route path="/creative-repo" element={<CreativeRepo products={products} creatives={creatives} setCreatives={setCreatives} user={currentUser} />} />
+                <Route path="/copy-repo" element={<GoodCopyRepo products={products} assets={goodCopy} setAssets={setGoodCopy} user={currentUser} />} />
+                <Route path="/script-repo" element={<GoodScriptRepo products={products} assets={goodScripts} setAssets={setGoodScripts} user={currentUser} />} />
+                <Route path="/oral-script" element={<OralScriptGenerator products={products} adCampaigns={adCampaigns} setAdCampaigns={setAdCampaigns} user={currentUser} />} />
+                <Route path="/assets" element={<AssetRepo products={products} setProducts={setProducts} prompts={prompts} setPrompts={setPrompts} user={currentUser} />} />
+                <Route path="/bv-repo" element={<BVPromptRepo prompts={bvPrompts} setPrompts={setBvPrompts} user={currentUser} />} />
+                <Route path="/settings" element={<SchemaEditor fields={fields} setFields={setFields} categories={categories} setCategories={setCategories} user={currentUser} />} />
+                <Route path="/ai-studio" element={<AIStudio products={products} setProducts={setProducts} prompts={[...prompts, ...bvPrompts]} user={currentUser} />} />
+                <Route path="/history" element={<AIHistory />} />
+                {currentUser.role === 'ADMIN' && (
+                  <Route path="/admin" element={<AdminPanel users={users} setUsers={setUsers} jobTitles={jobTitles} setJobTitles={setJobTitles} />} />
+                )}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </div>
+          </main>
+        </div>
+      )}
+    </Router>
+  );
+};
+
+export default App;
