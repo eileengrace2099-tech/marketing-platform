@@ -3,22 +3,22 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { HashRouter as Router, Routes, Route, Link, useLocation, Navigate, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Package, Settings, Sparkles, Plus, History, Archive, Menu, X as CloseIcon, Database, FileText, Video, Mic, Lightbulb, Users as UsersIcon, LogOut, Lock, Briefcase } from 'lucide-react';
 
-import Dashboard from './pages/Dashboard';
-import ProductList from './pages/ProductList';
-import SchemaEditor from './pages/SchemaEditor';
-import AIStudio from './pages/AIStudio';
-import AIHistory from './pages/AIHistory';
-import AssetRepo from './pages/AssetRepo';
-import BVPromptRepo from './pages/BVPromptRepo';
-import GoodCopyRepo from './pages/GoodCopyRepo';
-import GoodScriptRepo from './pages/GoodScriptRepo';
-import CreativeRepo from './pages/CreativeRepo';
-import OralScriptGenerator from './pages/OralScriptGenerator';
-import AdminPanel from './pages/AdminPanel';
-import Login from './pages/Login';
+import Dashboard from './pages/Dashboard.tsx';
+import ProductList from './pages/ProductList.tsx';
+import SchemaEditor from './pages/SchemaEditor.tsx';
+import AIStudio from './pages/AIStudio.tsx';
+import AIHistory from './pages/AIHistory.tsx';
+import AssetRepo from './pages/AssetRepo.tsx';
+import BVPromptRepo from './pages/BVPromptRepo.tsx';
+import GoodCopyRepo from './pages/GoodCopyRepo.tsx';
+import GoodScriptRepo from './pages/GoodScriptRepo.tsx';
+import CreativeRepo from './pages/CreativeRepo.tsx';
+import OralScriptGenerator from './pages/OralScriptGenerator.tsx';
+import AdminPanel from './pages/AdminPanel.tsx';
+import Login from './pages/Login.tsx';
 
-import { Product, FieldDefinition, PromptTemplate, GoodAsset, AdCampaign, CreativeAsset, User, UserPermissions } from './types';
-import { DEFAULT_FIELDS, DEFAULT_CATEGORIES, STORAGE_KEYS, ADMIN_PERMISSIONS, DEFAULT_JOB_TITLES } from './constants';
+import { Product, FieldDefinition, PromptTemplate, GoodAsset, AdCampaign, CreativeAsset, User, UserPermissions } from './types.ts';
+import { DEFAULT_FIELDS, DEFAULT_CATEGORIES, STORAGE_KEYS, ADMIN_PERMISSIONS, DEFAULT_JOB_TITLES } from './constants.ts';
 
 const Sidebar = ({ isOpen, setIsOpen, user, onLogout }: { isOpen: boolean; setIsOpen: (v: boolean) => void, user: User, onLogout: () => void }) => {
   const location = useLocation();
@@ -153,7 +153,6 @@ const App: React.FC = () => {
     const storedUsers = localStorage.getItem(STORAGE_KEYS.USERS);
     const storedJobTitles = localStorage.getItem(STORAGE_KEYS.JOB_TITLES);
 
-    // 優先從 sessionStorage 找當前使用者，再找 localStorage (自動登入)
     const storedCurrentUser = sessionStorage.getItem(STORAGE_KEYS.CURRENT_USER) || localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
 
     if (storedProducts) setProducts(JSON.parse(storedProducts));
